@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WhatsThePlant</string>
+    <string name="login">Login</string>
+    <string name="Signup">Signup</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="camera">Camera</string>
+    <string name="list">List</string>
+    <string name="profile">Profile</string>
+    <string name="web_client_id">802231603265-4egsui9c7aomd7igapaselp6s68fbjco.apps.googleusercontent.com</string>
+</resources>
