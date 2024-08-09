@@ -1,7 +1,7 @@
 package com.example.whatstheplant.composables
 
 import android.content.Intent
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -39,16 +40,27 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.whatstheplant.signin.AuthViewModel
 import com.example.whatstheplant.R
-import com.example.whatstheplant.activities.BaseActivity
+import com.example.whatstheplant.activities.WhatsThePlant
+import com.example.whatstheplant.signin.AuthClient
+import com.example.whatstheplant.signin.SignInState
+import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.ui.theme.gray
 import com.example.whatstheplant.ui.theme.green
 import com.example.whatstheplant.ui.theme.superDarkGreen
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(auth: AuthViewModel, navController: NavController) {
+fun LoginScreen(
+    state: SignInState = SignInState(),
+    onSignInClick: () -> Unit,
+    authClient: AuthClient,
+    authViewModel: SignInViewModel,
+    //googleIntentLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
+    navController: NavController
+) {
 
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
@@ -121,36 +133,28 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
 
             // Login button
             MyBigButton(text="Login", onClick = {
-                // Login logic
-                auth.signIn(
-                    email = emailState.value,
-                    password = passwordState.value
-                ){ success ->
-                    if (!success) {
-                        // Authentication failed
-                        Toast.makeText(
-                            context,
-                            "E-mail or password not valid",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    else {
-                        // Authentication successful
-                        Toast.makeText(
-                            context,
-                            "Welcome, ${auth.currentUser()?.displayName}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        // Start principal activity
-                        val userId = auth.currentUser()?.uid.toString()
-                        val username = auth.currentUser()?.displayName.toString()
-                        val intent = Intent(context, BaseActivity::class.java )
-                        intent.putExtra("user_id", userId)
-                        intent.putExtra("username", username)
-                        context.startActivity(intent)
-                    }
+                authViewModel.viewModelScope.launch {
+                    val signInResult = authClient.signInWithEmailAndPassword(
+                        emailState.value,
+                        passwordState.value
+                    )
+                    authViewModel.onSignInResult(
+                        signInResult,
+                        context
+                    )
+                    val userData = authClient.getSignedInUser()
+                    val intent = Intent(context, WhatsThePlant::class.java)
+                    //intent.putExtra("user_id", userData!!.userId)
+                    //intent.putExtra("username", userData!!.username)
+                    context.startActivity(intent)
                 }
             })
+
+            TextButton(onClick = { navController.navigate("SignUp") }) {
+                MyText(
+                    "Don't have an account? Register"
+                )
+            }
 
             // OAuth Options
             Spacer(modifier = Modifier.height(10.dp))
@@ -159,7 +163,7 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -171,7 +175,7 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
                     modifier = Modifier.padding(10.dp),
                     fontSize = 20.sp
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -186,13 +190,7 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = {/*
-                        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                            .setFilterByAuthorizedAccounts(true)
-                            //.setServerClientId(WEB_CLIENT_ID)
-                            .build()
-                            */
-                    },
+                    onClick = onSignInClick,
                     colors = ButtonDefaults.buttonColors(Color.Transparent),
                     modifier = Modifier
                         .padding(4.dp)
@@ -209,9 +207,11 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
                             .size(30.dp)
                     )
                 }
+                /*
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                    },
                     colors = ButtonDefaults.buttonColors(Color.Transparent),
                     modifier = Modifier
                         .padding(4.dp)
@@ -228,11 +228,7 @@ fun LoginScreen(auth: AuthViewModel, navController: NavController) {
                             .size(30.dp)
                     )
                 }
-            }
-            TextButton(onClick = { navController.navigate("SignUp") }) {
-                MyText(
-                    "Don't have an account? Register"
-                )
+                 */
             }
         }
     }

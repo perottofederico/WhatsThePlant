@@ -8,4 +8,5 @@ object NavTitle {
     const val CAMERA = "Camera"
     const val LIST = "List"
     const val PROFILE = "Profile"
+    const val EXIT = "Exit"
 }

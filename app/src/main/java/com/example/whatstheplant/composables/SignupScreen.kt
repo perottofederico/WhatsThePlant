@@ -24,13 +24,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.whatstheplant.signin.AuthViewModel
+import com.example.whatstheplant.signin.AuthClient
+import com.example.whatstheplant.signin.SignInState
+import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.ui.theme.superDarkGreen
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignupScreen(auth: AuthViewModel, navController: NavController) {
+fun SignupScreen(
+    state: SignInState? = SignInState(),
+    authClient: AuthClient,
+    authViewModel: SignInViewModel? = null,
+    navController: NavController
+) {
     val usernameState = remember { mutableStateOf("") }
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
@@ -163,20 +172,19 @@ fun SignupScreen(auth: AuthViewModel, navController: NavController) {
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    // After checking e-mail and password, it is possible to sign up
-                    auth.signUp(
-                        username = username,
-                        email = email,
-                        password = password
-                    ) { success ->
-                        if (success) {
-                            Toast.makeText(
-                                context,
-                                "You signed up correctly.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+                    authViewModel!!.viewModelScope.launch {
+                        // After checking e-mail and password, it is possible to sign up
+                        val signInResult = authClient.signUpWithEmailAndPassword(
+                            email = email,
+                            password = password,
+                            username = username,
+                        )
+                        authViewModel.onSignInResult(
+                            signInResult,
+                            context = context
+                        )
                     }
+
                     // Login redirection
                     navController.navigate("Login")
                 }

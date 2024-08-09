@@ -1,6 +1,6 @@
 package com.example.whatstheplant.signin
 
-data class GoogleSignInState(
+data class SignInState(
     val isSignInSuccessful: Boolean = false,
     val signInError: String? = null
 )
