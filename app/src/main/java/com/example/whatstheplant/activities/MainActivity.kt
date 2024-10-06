@@ -100,7 +100,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 authClient = authClient,
                                 authViewModel = signInViewModel,
-                                //googleIntentLauncher =
                                 navController = navController
                             )
                         }

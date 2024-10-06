@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">WhatsThePlant</string>
     <string name="login">Login</string>
     <string name="Signup">Signup</string>
@@ -8,4 +8,8 @@
     <string name="list">List</string>
     <string name="profile">Profile</string>
     <string name="web_client_id">802231603265-4egsui9c7aomd7igapaselp6s68fbjco.apps.googleusercontent.com</string>
+    //e.g your package name + ".fileprovider"
+    <string name="fileprovider">com.jerry.jetpack_take_select_photo_image.components.fileprovider</string>
+    <string name="plantid_api_key">URdmKXb9sPRevyslhlOo4xUMhMWZazm8uxXRnsMdtiWdch5zYM</string>
+    <string name="mapbox_access_token" translatable="false" tools:ignore="UnusedResources">pk.eyJ1IjoibXVzaHl3ZWlyZG8iLCJhIjoiY20xcDU5bDNlMDBwMDJqcjZhdTBjM3M0ZyJ9.VY3NEgB7SS8DfaLcExFYbA</string>
 </resources>

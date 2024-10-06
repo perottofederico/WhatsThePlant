@@ -1,0 +1,186 @@
+package com.example.whatstheplant.viewModel
+
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.material3.Snackbar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.whatstheplant.activities.WhatsThePlant
+import com.example.whatstheplant.api.firestore.FirestorePlant
+import com.example.whatstheplant.api.firestore.Retrofitclient
+import com.example.whatstheplant.api.firestore.firestoreApiInterface
+import com.example.whatstheplant.api.plantid.model.Plant
+import com.example.whatstheplant.datastore.PlantRepository
+import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
+    private val _selectedPlant = MutableLiveData<FirestorePlant>()
+    val selectedPlant: LiveData<FirestorePlant> get() = _selectedPlant
+
+    fun setSelectedPlant(plant: FirestorePlant) {
+        Log.d("PlantViewModel", "Setting selected plant: $plant")
+        _selectedPlant.value = plant
+    }
+
+    var plantsList by mutableStateOf<List<FirestorePlant>?>(null)
+        private set
+
+    var allPlants by mutableStateOf<List<FirestorePlant>?>(null)
+        private set
+
+    fun addPlant(plant: FirestorePlant) {
+        val call = firestoreApiInterface.addPlant(plant)
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    fetchPlantList(userId = plant.user_id)
+                    //Log.d("PLANTVIEWMODEL", "Success") // TODO add snackbar feedback
+                } else {
+                    // Handle error response from server
+                    Log.d(
+                        "PLANTVIEWMODEL",
+                        "Error: ${response.code()} - ${response.errorBody()?.string()}"
+                    )
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.d("PLANTVIEWMODEL", "Failure: ${t.message}")
+            }
+        })
+    }
+
+    fun fetchPlantList(userId: String) {
+        firestoreApiInterface.getPlantsByUser(userId)
+            .enqueue(object : Callback<List<FirestorePlant>> {
+                override fun onResponse(
+                    call: Call<List<FirestorePlant>>,
+                    response: Response<List<FirestorePlant>>
+                ) {
+                    if (response.isSuccessful) {
+                        val plants = response.body()
+                        if (plants != null) {
+                            // Successfully received a list of plants, update the state
+                            Log.d(
+                                "PLANTVIEWMODEL - SINGLEUSER",
+                                "Fetched ${plants.size} plants from API."
+                            )
+                            plantsList = plants
+                        } else {
+                            // Handle case where the response body is null (unexpected)
+                            Log.w(
+                                "PLANTVIEWMODEL - SINGLEUSER",
+                                "No plants returned by the API (null body)."
+                            )
+                            plantsList = emptyList()  // Set to an empty list in case of null
+                        }
+                    } else {
+                        // Handle non-success HTTP status codes (4xx, 5xx)
+                        Log.e(
+                            "PLANTVIEWMODEL - SINGLEUSER",
+                            "API response error: ${response.code()} - ${response.message()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<List<FirestorePlant>>, t: Throwable) {
+                    Log.e("API Error", "Failure: ${t.message}")
+                }
+            })
+    }
+
+    fun fetchAllPlants() {
+        firestoreApiInterface.getAllPlants().enqueue(object : Callback<List<FirestorePlant>> {
+            override fun onResponse(
+                call: Call<List<FirestorePlant>>,
+                response: Response<List<FirestorePlant>>
+            ) {
+                if (response.isSuccessful) {
+                    val plants = response.body()
+                    if (plants != null) {
+                        // Successfully received a list of plants, update the state
+                        Log.d(
+                            "PLANTVIEWMODEL - ALLPLANTS",
+                            "Fetched ${plants.size} plants from API."
+                        )
+                        allPlants = plants
+                    } else {
+                        // Handle case where the response body is null (unexpected)
+                        Log.w(
+                            "PLANTVIEWMODEL - ALLPLANTS",
+                            "No plants returned by the API (null body)."
+                        )
+                        allPlants = emptyList()  // Set to an empty list in case of null
+                    }
+                } else {
+                    // Handle non-success HTTP status codes (4xx, 5xx)
+                    Log.e(
+                        "PLANTVIEWMODEL - ALLPLANTS",
+                        "API response error: ${response.code()} - ${response.message()}"
+                    )
+                }
+            }
+
+            override fun onFailure(call: Call<List<FirestorePlant>>, t: Throwable) {
+                Log.e("API Error", "Failure: ${t.message}")
+            }
+        })
+    }
+
+    fun deletePlant(userId: String, plantId: String) {
+        firestoreApiInterface.deletePlant(plantId = plantId)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        fetchPlantList(userId = userId)
+                        Log.d("PLANTVIEWMODEL", "Plant removed successfully")
+                    } else {
+                        Log.w(
+                            "PLANTVIEWMODEL",
+                            "Error: ${response.code()} - ${response.errorBody()?.string()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e("API Error", "Failure: ${t.message}")
+                }
+            })
+    }
+
+
+
+    private val _scannedPlantsCount = mutableStateOf(0)
+    val scannedPlantsCount: State<Int> = _scannedPlantsCount
+
+    init {
+        // Observe the stored scanned count
+        viewModelScope.launch {
+            repository.scannedCountFlow.collect { count ->
+                _scannedPlantsCount.value = count
+            }
+        }
+    }
+
+    // Increment and persist the scanned count
+    fun incrementScannedCount() {
+        viewModelScope.launch {
+            val newCount = _scannedPlantsCount.value + 1
+            _scannedPlantsCount.value = newCount
+            repository.saveScannedCount(newCount)
+        }
+    }
+
+}

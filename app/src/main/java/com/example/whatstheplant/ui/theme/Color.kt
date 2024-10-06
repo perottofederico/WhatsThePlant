@@ -10,7 +10,14 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val superDarkGreen = Color(40, 68, 12)
-val green2 = Color(175,213,133,255)
-val green = Color(7, 66, 55)
+// greens
+val darkGreen = Color(9, 57, 35)
+val lightGreen = Color(37,139,52)
+val green = Color(13, 91, 41)
+val lightPastelGreen = Color(108, 194, 93, 255)
+val veryLightGreen = Color(216, 245, 136)
+
 val gray = Color (76, 76, 76, 100)
+
+val lightBlue = Color(35,137,218)
+val yellowSun = Color(255,223,34)

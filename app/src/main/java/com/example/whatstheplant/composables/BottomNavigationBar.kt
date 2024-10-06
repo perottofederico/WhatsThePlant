@@ -20,30 +20,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import com.example.whatstheplant.activities.CameraActivity
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.whatstheplant.nav.NavItem
+import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.green
 
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
     bottomBarState: MutableState<Boolean>
-    ){
+) {
     val context = LocalContext.current
     val bottomAppBarState = rememberSaveable {
         mutableStateOf(true)
     }
     val navItems =
-        listOf(NavItem.Home, NavItem.Search, NavItem.Camera, NavItem.List, NavItem.Profile)
-    var selectedItem by rememberSaveable { mutableIntStateOf(0) }
+        listOf(NavItem.Home, NavItem.Search, NavItem.Camera, NavItem.Feed, NavItem.Profile)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     AnimatedVisibility(
         visible = bottomBarState.value,
-        enter = slideInVertically(initialOffsetY = {it}),
-        exit = slideOutVertically(targetOffsetY = {it}),
+        enter = slideInVertically(initialOffsetY = { it }),
+        exit = slideOutVertically(targetOffsetY = { it }),
         content = {
             NavigationBar(
-                containerColor = green,
+                containerColor = darkGreen,
                 contentColor = Color.White
             ) {
                 navItems.forEachIndexed { index, item ->
@@ -58,22 +60,18 @@ fun BottomNavigationBar(
                         alwaysShowLabel = true,
                         icon = { Icon(item.icon, contentDescription = item.title) },
                         label = { Text(item.title) },
-                        selected = selectedItem == index,
+                        selected = currentRoute == item.path,
                         onClick = {
-                            bottomBarState.value = item.title != "Camera"
+                            //bottomBarState.value = item.title != "Camera"
 
-                            //if(item.title == "Camera"){
-                                //val intent = Intent(context, CameraActivity::class.java)
-                                //context.startActivity(intent)
-                            //} else {
-                                selectedItem = index
-                                navController.navigate(item.path) {
-                                    navController.graph.startDestinationRoute?.let { route ->
-                                        popUpTo(route) { saveState = true }
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                            //currentRoute = navItems[index].path
+                            navController.navigate(item.path) {
+                                navController.graph.startDestinationRoute?.let { route ->
+                                    popUpTo(route) { saveState = true }
                                 }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                             //}
                         }
                     )

@@ -47,9 +47,9 @@ import com.example.whatstheplant.activities.WhatsThePlant
 import com.example.whatstheplant.signin.AuthClient
 import com.example.whatstheplant.signin.SignInState
 import com.example.whatstheplant.signin.SignInViewModel
+import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.gray
 import com.example.whatstheplant.ui.theme.green
-import com.example.whatstheplant.ui.theme.superDarkGreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -106,9 +106,9 @@ fun LoginScreen(
                 },
                 label = { MyText("Email") },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen
                 )
             )
 
@@ -123,9 +123,9 @@ fun LoginScreen(
                 label = { MyText("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen
                 )
             )
 
@@ -157,7 +157,7 @@ fun LoginScreen(
             }
 
             // OAuth Options
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -167,7 +167,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    thickness = 1.dp,
+                    thickness = 2.dp,
                     color = gray
                 )
                 Text(
@@ -179,10 +179,12 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    thickness = 1.dp,
+                    thickness = 2.dp,
                     color = gray
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,

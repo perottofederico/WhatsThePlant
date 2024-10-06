@@ -40,6 +40,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -66,6 +67,8 @@ dependencies {
     //implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,6 +78,9 @@ dependencies {
 
     // Some icons aren't included for some reason
     implementation("androidx.compose.material:material-icons-extended:$1.6.8")
+
+    // this also isn't included for some reason
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
@@ -86,6 +92,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     // Also add the dependency for the Google Play services library and specify its version
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation(libs.androidx.datastore.preferences)
 
 
     //Camera
@@ -103,5 +110,18 @@ dependencies {
     implementation ("io.coil-kt:coil-compose:2.5.0")
 
     implementation("io.insert-koin:koin-android:3.5.3")
+
+    //http requests
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // mapbox SDK for Android
+    implementation("com.mapbox.maps:android:11.7.0")
+    implementation("com.mapbox.extension:maps-compose:11.7.0")
 
 }

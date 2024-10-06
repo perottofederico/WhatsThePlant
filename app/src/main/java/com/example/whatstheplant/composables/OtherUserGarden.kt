@@ -1,76 +1,59 @@
-package com.example.whatstheplant.composables.tabs
+package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.whatstheplant.R
 import com.example.whatstheplant.api.firestore.FirestorePlant
-import com.example.whatstheplant.signin.UserData
+import com.example.whatstheplant.nav.NavItem
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.example.whatstheplant.viewModel.PlantViewModel
-import com.example.whatstheplant.viewModel.UserViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun OtherUserGarden(
     navController: NavController,
-    userData: UserData,
-    plantViewModel: PlantViewModel
-) {
+    plantViewModel: PlantViewModel,
+    userId: String
+){
 
     // Use LaunchedEffect to trigger the API call only once when the HomeScreen is first composed
     LaunchedEffect(Unit) {
-        plantViewModel.fetchPlantList(userId = userData.userId)
+        plantViewModel.fetchPlantList(userId = userId)
     }
+
     val plantsList = plantViewModel.plantsList
 
     Scaffold(
@@ -82,20 +65,18 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            text = "Your Garden",
+                            text = "${plantsList?.get(0)?.username}'s Garden",
                             style = typography.displaySmall
                         )
                     }
-                },
-                //colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = darkGreen)
+                }
             )
         }
     ){
         if (plantsList == null) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -110,8 +91,7 @@ fun HomeScreen(
         } else if (plantsList.isEmpty()) {
             // Show a message when there are no plants
             Column(
-                modifier = Modifier.fillMaxSize()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

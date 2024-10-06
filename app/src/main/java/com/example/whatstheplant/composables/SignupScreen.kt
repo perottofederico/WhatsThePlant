@@ -29,7 +29,7 @@ import androidx.navigation.NavController
 import com.example.whatstheplant.signin.AuthClient
 import com.example.whatstheplant.signin.SignInState
 import com.example.whatstheplant.signin.SignInViewModel
-import com.example.whatstheplant.ui.theme.superDarkGreen
+import com.example.whatstheplant.ui.theme.darkGreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,9 +73,9 @@ fun SignupScreen(
                 },
                 label = { MyText("Username") },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen,
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen,
                 )
             )
 
@@ -88,9 +88,9 @@ fun SignupScreen(
                 },
                 label = { MyText("Email") },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen,
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen,
                 )
             )
 
@@ -106,9 +106,9 @@ fun SignupScreen(
                 label = { MyText("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen,
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen,
                 )
             )
 
@@ -122,9 +122,9 @@ fun SignupScreen(
                 label = { MyText("Confirm Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = superDarkGreen,
-                    cursorColor = superDarkGreen,
-                    focusedBorderColor = superDarkGreen,
+                    focusedTextColor = darkGreen,
+                    cursorColor = darkGreen,
+                    focusedBorderColor = darkGreen,
                 )
             )
 
@@ -134,7 +134,7 @@ fun SignupScreen(
                 "The password must be at least 8 characters long, with at least " +
                         "one uppercase character, one lowercase character and one digit.",
                 textAlign = TextAlign.Center,
-                color = superDarkGreen,
+                color = darkGreen,
                 fontSize = 10.sp
             )
             Spacer(modifier = Modifier.height(13.dp))
@@ -191,7 +191,7 @@ fun SignupScreen(
 
             })
             TextButton(onClick = { navController.navigate("Login") }) {
-                Text("Already have an account? Login", color = superDarkGreen)
+                Text("Already have an account? Login", color = darkGreen)
             }
         }
     }

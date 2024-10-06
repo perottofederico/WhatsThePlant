@@ -6,7 +6,12 @@ object NavTitle {
     const val HOME = "Home"
     const val SEARCH = "Search"
     const val CAMERA = "Camera"
-    const val LIST = "List"
+    const val FEED = "Feed"
     const val PROFILE = "Profile"
+
+    const val APIRESULT = "ApiResult"
+    const val PLANTDETAIL = "PlantDetail"
+    const val OTHERUSERPLANTDETAIL = "OtherUserPlantDetail"
+    const val OTHERUSERGARDEN = "OtherUserGarden"
     const val EXIT = "Exit"
 }
