@@ -18,12 +18,11 @@ import com.example.whatstheplant.nav.NavItem
 import com.example.whatstheplant.composables.tabs.HomeScreen
 import com.example.whatstheplant.composables.tabs.ProfileScreen
 import com.example.whatstheplant.composables.tabs.calendar.CalendarScreen
-import com.example.whatstheplant.composables.tabs.camera.CameraScreen
+import com.example.whatstheplant.composables.tabs.CameraScreen
 import com.example.whatstheplant.composables.tabs.SocialScreen
 import com.example.whatstheplant.datastore.PlantRepository
 
 import com.example.whatstheplant.signin.AuthClient
-import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.signin.UserData
 import com.example.whatstheplant.viewModel.PlantViewModel
 import com.example.whatstheplant.viewModel.PlantViewModelFactory
@@ -38,7 +37,6 @@ fun NavigationScreens(
     navController: NavHostController,
     signOutHandler: SignOutHandler
 ) {
-    val viewModel = viewModel<SignInViewModel>()
     val repository = PlantRepository(LocalContext.current)
     val plantViewModel: PlantViewModel = viewModel(factory = PlantViewModelFactory(repository))
     val userViewModel: UserViewModel = viewModel()
@@ -84,7 +82,6 @@ fun NavigationScreens(
             ProfileScreen(
                 userData = userData,
                 authClient = authClient,
-                viewModel = viewModel,
                 plantViewModel = plantViewModel,
                 signOutHandler = signOutHandler
             )

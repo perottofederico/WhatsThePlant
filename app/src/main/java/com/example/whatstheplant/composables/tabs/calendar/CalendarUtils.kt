@@ -44,6 +44,7 @@ import com.example.whatstheplant.ui.theme.lightBlue
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
+import java.time.LocalDate
 import java.time.YearMonth
 
 
@@ -114,13 +115,30 @@ private fun CalendarNavigationIcon(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) -> Unit, hasTask : Boolean?, taskTypes: Set<String>?) {
+fun Day(
+    day: CalendarDay,
+    isSelected: Boolean,
+    onClick: (CalendarDay) -> Unit,
+    taskTypes: Set<String>?
+) {
+
+    if (day.date == LocalDate.now()) {
+        Box(
+            modifier = Modifier
+                .aspectRatio(1f) // This is important for square-sizing!
+                .testTag("MonthDay")
+                .padding(6.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = veryLightGreen.copy(alpha = 0.3F))
+        )
+    }
+
     Box(
         modifier = Modifier
             .aspectRatio(1f) // This is important for square-sizing!
             .testTag("MonthDay")
             .padding(6.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(color = if (isSelected) veryLightGreen else Color.Transparent)
             // Disable clicks on inDates/outDates
             .clickable(
@@ -140,43 +158,39 @@ fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) -> Unit, h
             color = textColor,
             fontSize = 14.sp,
         )
-        Row(){
-
-        }
-        if(taskTypes !=  null){
+        if (taskTypes != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
-            ){
+            ) {
 
-                if(taskTypes.contains("Watering")){
+                if (taskTypes.contains("Watering")) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(lightBlue)
                             .size(8.dp) // Smaller circle
-                            .padding(2.dp)
+                            .padding(4.dp)
                     )
                     // Spacer between task indicators
                     Spacer(modifier = Modifier.width(4.dp))
                 }
 
 
-                if(taskTypes.contains("Pruning")){
+                if (taskTypes.contains("Pruning")) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(darkGreen)
                             .size(8.dp) // Smaller circle
-                            .padding(2.dp)
+                            .padding(4.dp)
                     )
                     // Spacer between task indicators
                     Spacer(modifier = Modifier.width(4.dp))
                 }
-
 
 
                 // Task Type 3
@@ -186,7 +200,7 @@ fun Day(day: CalendarDay, isSelected: Boolean, onClick: (CalendarDay) -> Unit, h
                             .clip(CircleShape)
                             .background(Color.Magenta) // Different color for task 3
                             .size(8.dp)
-                            .padding(2.dp)
+                            .padding(4.dp)
                     )
                 }
 

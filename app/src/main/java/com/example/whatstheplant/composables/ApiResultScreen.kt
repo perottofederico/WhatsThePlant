@@ -1,10 +1,8 @@
 package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,7 +56,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.whatstheplant.R
@@ -79,7 +76,6 @@ import com.mapbox.maps.extension.compose.annotation.rememberIconImage
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ApiResultScreen(
@@ -123,10 +119,10 @@ fun ApiResultScreen(
     val bestLightCondition = firstSuggestion?.details?.best_light_condition
     val bestSoilType = firstSuggestion?.details?.best_soil_type
     val bestWatering = firstSuggestion?.details?.best_watering
-    val watering = firstSuggestion?.details?.watering
+    //val watering = firstSuggestion?.details?.watering
 
     val taxonomy = firstSuggestion?.details?.taxonomy //TODO Make taxonomy appearance better
-    val synonyms = firstSuggestion?.details?.synonyms
+    //val synonyms = firstSuggestion?.details?.synonyms
     val edibleParts = firstSuggestion?.details?.edible_parts.toString()
     val commonUses = firstSuggestion?.details?.common_uses
     val culturalSignificance = firstSuggestion?.details?.cultural_significance
@@ -433,7 +429,7 @@ fun ApiResultScreen(
                                     }
                                 }
                             }
-                            if (edibleParts.toString() != "null") {
+                            if (edibleParts != "null") {
                                 item {
                                     ElevatedButton(
                                         modifier = Modifier.padding(8.dp),
@@ -443,7 +439,7 @@ fun ApiResultScreen(
                                             darkGreen
                                         ),
                                         onClick = {
-                                            shownText.value = edibleParts.toString()
+                                            shownText.value = edibleParts
                                             chosenButton.value = "Edible Parts"
                                             coroutineScope.launch {
                                                 scrollState.animateScrollToItem(index = 10)
@@ -586,7 +582,6 @@ fun ApiResultScreen(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -599,7 +594,7 @@ fun NewPreview() {
     }
     Scaffold(
         floatingActionButton = {
-            Box() {
+            Box {
                 LargeFloatingActionButton(onClick = { /* Handle FAB click */ },
                     containerColor = Color(216, 245, 136),
                     content = {
@@ -653,7 +648,7 @@ fun NewPreview() {
                                 .padding(8.dp)
                         ) {
                             Text(
-                                text = "Basilico del Cazzo",
+                                text = "Basilico del ",
                                 style = MaterialTheme.typography.displayMedium,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)

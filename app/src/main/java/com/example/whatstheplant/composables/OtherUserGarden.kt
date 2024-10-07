@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.whatstheplant.api.firestore.FirestorePlant
-import com.example.whatstheplant.nav.NavItem
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.example.whatstheplant.viewModel.PlantViewModel

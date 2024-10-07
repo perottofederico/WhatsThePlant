@@ -1,6 +1,5 @@
 package com.example.whatstheplant.api.firestore
 
-import com.example.whatstheplant.api.plantid.model.SimilarImage
 import com.example.whatstheplant.api.plantid.model.Taxonomy
 
 data class FirestorePlant(

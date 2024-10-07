@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -27,15 +26,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.whatstheplant.signin.AuthClient
-import com.example.whatstheplant.signin.SignInState
 import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.ui.theme.darkGreen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(
-    state: SignInState? = SignInState(),
     authClient: AuthClient,
     authViewModel: SignInViewModel? = null,
     navController: NavController

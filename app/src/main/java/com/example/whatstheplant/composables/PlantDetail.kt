@@ -1,17 +1,14 @@
 package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
-import android.health.connect.datatypes.units.Length
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,13 +40,11 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.ArrowDropUp
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -76,14 +71,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -111,7 +103,6 @@ import com.example.whatstheplant.ui.theme.yellowSun
 import com.example.whatstheplant.viewModel.PlantViewModel
 import com.example.whatstheplant.viewModel.TaskViewModel
 import com.mapbox.geojson.Point
-import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
@@ -127,7 +118,6 @@ import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(
-    ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class
 )
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -186,8 +176,8 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
         val culturalSignificance = plant?.culturalSignificance
         val toxicity = plant?.toxicity
 
-        val latitude = plant?.latitude?.toDouble()
-        val longitude = plant?.longitude?.toDouble()
+        val latitude = plant?.latitude
+        val longitude = plant?.longitude
 
         val shownText =
             remember {
@@ -197,7 +187,6 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
             mutableStateOf("Taxonomy")
         }
         val coroutineScope = rememberCoroutineScope()
-        var isMapTouched by remember { mutableStateOf(false) }
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -238,7 +227,11 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                plant?.let { DropDownMenuContent(plant = it, taskViewModel = taskViewModel) }
+                                plant?.let { DropDownMenuContent(
+                                    plant = it,
+                                    taskViewModel = taskViewModel,
+                                    onConfirmClick = { expanded = false }
+                                ) }
                             }
                         }
                         IconButton(onClick = {
@@ -319,174 +312,11 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                     ) {
                         Text(
                             text = name.toString(),
-                            style = MaterialTheme.typography.displayMedium,
+                            style = typography.displayMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
-
-                    /*
-                    Column(
-                        modifier = Modifier.verticalScroll(columnScrollState)
-                            .fillMaxSize()
-                            .weight(1f)  // This will make the LazyColumn take up the remaining space
-                            .padding(bottom = 90.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-                                if (commonNames != null) {
-                                    Text(
-                                        text = "Commonly Known As: ${
-                                            commonNames.substring(
-                                                1,
-                                                commonNames.length - 1
-                                            )
-                                        }",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Color.Gray,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = description.toString(),
-                                style = typography.bodyLarge,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-
-                            HorizontalDivider(
-                                thickness = 1.dp, color = Color.Gray, modifier = Modifier.padding(
-                                    start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp
-                                )
-                            )
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.WaterDrop,
-                                        contentDescription = "User Icon",
-                                        tint = lightBlue
-                                    )
-                                    Text(
-                                        text = "Watering Guide",
-                                        style = typography.headlineMedium,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                Text(
-                                    bestWatering.toString(),
-                                    style = typography.bodyLarge,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
-
-                            HorizontalDivider(
-                                thickness = 1.dp, color = Color.Gray, modifier = Modifier.padding(
-                                    start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp
-                                )
-                            )
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.WbSunny,
-                                        contentDescription = "User Icon",
-                                        tint = yellowSun
-                                    )
-                                    Text(
-                                        text = "Sunlight Tips",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                Text(
-                                    bestLightCondition.toString(),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
-                            val mapState = rememberMapState {
-                                gesturesSettings = GesturesSettings {
-                                    pitchEnabled = false
-                                    scrollEnabled = true
-                                }
-                            }
-
-                            val viewport = rememberMapViewportState {
-                                setCameraOptions {
-                                    zoom(11.0)
-                                    center(
-                                        Point.fromLngLat(
-                                            plant!!.longitude!!.toDouble(),
-                                            plant!!.latitude!!.toDouble()
-                                        )
-                                    )
-                                    pitch(0.0)
-                                    bearing(0.0)
-                                }
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 16.dp, bottom = 32.dp, end = 16.dp)
-                                    .height(300.dp)
-
-                            ) {
-                                MapboxMap(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .height(300.dp),
-                                    mapViewportState = viewport,
-                                    mapState = mapState
-                                ) {
-                                    val marker = rememberIconImage(
-                                        key = R.drawable.red_marker,
-                                        painter = painterResource(R.drawable.red_marker)
-                                    )
-                                    PointAnnotation(
-                                        point = Point.fromLngLat(
-                                            longitude!!,
-                                            latitude!!
-                                        )
-                                    ) {
-                                        // specify the marker image
-                                        iconImage = marker
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    */
 
                     LazyColumn(
                         state = scrollState,
@@ -494,15 +324,6 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                             .fillMaxSize()
                             .weight(1f)  // This will make the LazyColumn take up the remaining space
                             .padding(bottom = 90.dp)
-                            .pointerInteropFilter { event ->
-
-                                // Only allow scrolling if the map is not touched
-                                if (isMapTouched) {
-                                    true // Prevent LazyColumn from scrolling when the map is touched
-                                } else {
-                                    false // Allow LazyColumn to handle scroll events when the map is not touched
-                                }
-                            }
                     ) {
                         item {
                             Column(
@@ -611,13 +432,13 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                     )
                                     Text(
                                         text = "Sunlight Tips",
-                                        style = MaterialTheme.typography.headlineMedium,
+                                        style = typography.headlineMedium,
                                         textAlign = TextAlign.Center
                                     )
                                 }
                                 Text(
                                     bestLightCondition.toString(),
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = typography.bodyLarge,
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }
@@ -653,13 +474,13 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                     )
                                     Text(
                                         text = "Soil Suggestions",
-                                        style = MaterialTheme.typography.headlineMedium,
+                                        style = typography.headlineMedium,
                                         textAlign = TextAlign.Center
                                     )
                                 }
                                 Text(
                                     text = bestSoilType.toString(),
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = typography.bodyLarge,
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }
@@ -792,7 +613,7 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                 ) {
                                     Text(
                                         text = chosenButton.value,
-                                        style = MaterialTheme.typography.headlineMedium,
+                                        style =typography.headlineMedium,
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier.padding(8.dp)
                                     )
@@ -860,57 +681,10 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                         .fillMaxWidth()
                                         .padding(start = 16.dp, bottom = 32.dp, end = 16.dp)
                                         .height(300.dp)
-                                    /*
-                                    .pointerInput(Unit) {
-                                        detectDragGestures { change, dragAmount ->
-                                            Log.d(
-                                                "DRAG",
-                                                "Ddrag on MapboxMap: $dragAmount"
-                                            )
-                                            coroutineScope.launch {
-                                                val cameraState = viewport.cameraState
-                                                if (cameraState != null) {
-                                                    val currentCenter = cameraState.center
-                                                    val newLatitude = currentCenter.latitude() + (dragAmount.y / 300)
-                                                    val newLongitude = currentCenter.longitude() - (dragAmount.x / 300)
-                                                    viewport.moveBy(screenCoordinate = ScreenCoordinate(dragAmount.x.toDouble(), dragAmount.y.toDouble()))
-                                                }
-                                            }
-                                        }
-                                    }
-                                     */
                                 ) {
                                     MapboxMap(
                                         Modifier
                                             .fillMaxSize()
-                                            .pointerInput(Unit) {
-                                                detectDragGestures { change, dragAmount ->
-                                                    Log.d(
-                                                        "DRAG",
-                                                        "Ddrag on MapboxMap: $dragAmount"
-                                                    )
-                                                    coroutineScope.launch {
-                                                        val cameraState = viewport.cameraState
-                                                        if (cameraState != null) {
-                                                            val currentCenter = cameraState.center
-                                                            val newLatitude =
-                                                                currentCenter.latitude() + (dragAmount.y / 300)
-                                                            val newLongitude =
-                                                                currentCenter.longitude() - (dragAmount.x / 300)
-                                                            viewport.easeTo(
-                                                                cameraOptions = cameraOptions {
-                                                                    center(
-                                                                        Point.fromLngLat(
-                                                                            newLongitude,
-                                                                            newLatitude
-                                                                        )
-                                                                    )
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
                                             .height(300.dp),
                                         mapViewportState = viewport,
                                         mapState = mapState
@@ -990,7 +764,7 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel) {
+fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, onConfirmClick: () -> Unit ) {
     val context = LocalContext.current
 
     //First field - Task type
@@ -1053,7 +827,7 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel) {
             onDismissRequest = { expandTasksMenu = false },
             offset = DpOffset(0.dp, (-70).dp)
         ) {
-            tasks.forEachIndexed { index, task ->
+            tasks.forEachIndexed { _, task ->
                 DropdownMenuItem(text = {
                     Text(text = task)
                 },
@@ -1195,6 +969,7 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel) {
                             FirestoreTask(
                                 userId = plant.user_id,
                                 plantId = it,
+                                plantName = plant.name!!,
                                 taskId = "",
                                 type = chosenTask,
                                 startDate = startDate.replace("/", "-"),
@@ -1204,7 +979,16 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel) {
                         }
                         if (task != null) {
                             taskViewModel.addTask(task)
+                            expandTasksMenu  =  false
+                            showStartPopup = false
+                            showEndPopup =  false
+                            onConfirmClick()
                         }
+                        Toast.makeText(
+                            context,
+                            "Task schedule added.",
+                            LENGTH_LONG
+                        ).show()
                     }
                 }) {
                     Text("Confirm", color = Color.Black)
@@ -1235,7 +1019,7 @@ fun Preview() {
         ) {
             Text(
                 text = "Taxonomy",
-                style = MaterialTheme.typography.headlineMedium,
+                style = typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(8.dp)
             )
@@ -1244,7 +1028,7 @@ fun Preview() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Column() {
+            Column {
                 val str1 = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(fontWeight = FontWeight.Bold)
@@ -1257,7 +1041,7 @@ fun Preview() {
                 Text(text = "Phylum: Tracheophyta")
                 Text(text = "Class: Magnoliiopsida")
             }
-            Column() {
+            Column {
                 Text(text = "Order: Lamiales")
                 Text(text = "Family: Scrophulariaceae")
                 Text(text = "Genus: Buddleja")

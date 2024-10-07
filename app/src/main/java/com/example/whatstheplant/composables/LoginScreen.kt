@@ -1,7 +1,6 @@
 package com.example.whatstheplant.composables
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -45,7 +42,6 @@ import androidx.navigation.NavController
 import com.example.whatstheplant.R
 import com.example.whatstheplant.activities.WhatsThePlant
 import com.example.whatstheplant.signin.AuthClient
-import com.example.whatstheplant.signin.SignInState
 import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.gray
@@ -54,11 +50,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    state: SignInState = SignInState(),
     onSignInClick: () -> Unit,
     authClient: AuthClient,
     authViewModel: SignInViewModel,
-    //googleIntentLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     navController: NavController
 ) {
 
@@ -142,10 +136,7 @@ fun LoginScreen(
                         signInResult,
                         context
                     )
-                    val userData = authClient.getSignedInUser()
                     val intent = Intent(context, WhatsThePlant::class.java)
-                    //intent.putExtra("user_id", userData!!.userId)
-                    //intent.putExtra("username", userData!!.username)
                     context.startActivity(intent)
                 }
             })

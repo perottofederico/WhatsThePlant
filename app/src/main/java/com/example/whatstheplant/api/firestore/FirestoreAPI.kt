@@ -52,4 +52,4 @@ object Retrofitclient {
             .build()
 }
 
-val firestoreApiInterface = Retrofitclient.retrofit.create(FirestoreApiInterface::class.java)
+val firestoreApiInterface: FirestoreApiInterface = Retrofitclient.retrofit.create(FirestoreApiInterface::class.java)

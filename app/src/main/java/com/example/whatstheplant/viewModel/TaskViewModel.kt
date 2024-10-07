@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.whatstheplant.api.firestore.FirestorePlant
 import com.example.whatstheplant.api.firestore.FirestoreTask
 import com.example.whatstheplant.api.firestore.firestoreApiInterface
 import retrofit2.Call
@@ -23,9 +22,7 @@ class TaskViewModel : ViewModel() {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     fetchTaskList(userId = task.userId)
-                    //Log.d("TASKVIEWMODEL", "Success") // TODO add snackbar feedback
                 } else {
-                    // Handle error response from server
                     Log.w(
                         "TASKVIEWMODEL",
                         "Error: ${response.code()} - ${response.errorBody()?.string()}"

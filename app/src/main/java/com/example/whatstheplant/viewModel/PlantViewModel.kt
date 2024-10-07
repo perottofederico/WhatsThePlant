@@ -1,24 +1,17 @@
 package com.example.whatstheplant.viewModel
 
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.material3.Snackbar
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whatstheplant.activities.WhatsThePlant
 import com.example.whatstheplant.api.firestore.FirestorePlant
-import com.example.whatstheplant.api.firestore.Retrofitclient
 import com.example.whatstheplant.api.firestore.firestoreApiInterface
-import com.example.whatstheplant.api.plantid.model.Plant
 import com.example.whatstheplant.datastore.PlantRepository
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -46,7 +39,7 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     fetchPlantList(userId = plant.user_id)
-                    //Log.d("PLANTVIEWMODEL", "Success") // TODO add snackbar feedback
+                    //Log.d("PLANTVIEWMODEL", "Success")
                 } else {
                     // Handle error response from server
                     Log.d(
@@ -74,14 +67,14 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
                         if (plants != null) {
                             // Successfully received a list of plants, update the state
                             Log.d(
-                                "PLANTVIEWMODEL - SINGLEUSER",
+                                "PLANTVIEWMODEL",
                                 "Fetched ${plants.size} plants from API."
                             )
                             plantsList = plants
                         } else {
                             // Handle case where the response body is null (unexpected)
                             Log.w(
-                                "PLANTVIEWMODEL - SINGLEUSER",
+                                "PLANTVIEWMODEL",
                                 "No plants returned by the API (null body)."
                             )
                             plantsList = emptyList()  // Set to an empty list in case of null
@@ -89,7 +82,7 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
                     } else {
                         // Handle non-success HTTP status codes (4xx, 5xx)
                         Log.e(
-                            "PLANTVIEWMODEL - SINGLEUSER",
+                            "PLANTVIEWMODEL",
                             "API response error: ${response.code()} - ${response.message()}"
                         )
                     }
@@ -162,14 +155,14 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
 
 
 
-    private val _scannedPlantsCount = mutableStateOf(0)
+    private val _scannedPlantsCount = mutableIntStateOf(0)
     val scannedPlantsCount: State<Int> = _scannedPlantsCount
 
     init {
         // Observe the stored scanned count
         viewModelScope.launch {
             repository.scannedCountFlow.collect { count ->
-                _scannedPlantsCount.value = count
+                _scannedPlantsCount.intValue = count
             }
         }
     }
@@ -177,8 +170,8 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
     // Increment and persist the scanned count
     fun incrementScannedCount() {
         viewModelScope.launch {
-            val newCount = _scannedPlantsCount.value + 1
-            _scannedPlantsCount.value = newCount
+            val newCount = _scannedPlantsCount.intValue + 1
+            _scannedPlantsCount.intValue = newCount
             repository.saveScannedCount(newCount)
         }
     }

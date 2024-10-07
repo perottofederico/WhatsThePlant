@@ -2,9 +2,6 @@ package com.example.whatstheplant.composables.tabs
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,18 +23,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Yard
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,17 +38,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,8 +57,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,13 +65,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.whatstheplant.R
 import com.example.whatstheplant.api.firestore.FirestorePlant
-import com.example.whatstheplant.api.plantid.model.Plant
 import com.example.whatstheplant.signin.UserData
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.example.whatstheplant.viewModel.PlantViewModel
 import com.example.whatstheplant.viewModel.UserViewModel
-import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 import kotlinx.coroutines.launch
 
 enum class SocialPage(
@@ -98,17 +82,16 @@ enum class SocialPage(
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SocialScreen(
     navController: NavController,
     userData: UserData,
     plantViewModel: PlantViewModel,
-    pages: Array<SocialPage> = SocialPage.values(),
+    pages: Array<SocialPage> = SocialPage.entries.toTypedArray(),
     userViewModel: UserViewModel
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    // Use LaunchedEffect to trigger the API call only once when the HomeScreen is first composed
+    // Trigger the API call when the HomeScreen is first composed
     LaunchedEffect(Unit) {
         plantViewModel.fetchAllPlants()
         userViewModel.getUser(userData.userId)
@@ -125,7 +108,6 @@ fun SocialScreen(
         //topBar = {}
     ) {
         PagerScreen(
-            onPlantClick = {},
             pagerState = pagerState,
             pages = pages,
             plantsList = plantsList,
@@ -135,91 +117,11 @@ fun SocialScreen(
             navController = navController
         )
     }
-
-    /*
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Search Bar at the top
-        TextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = "Search for users...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-            colors = TextFieldDefaults.colors(Color.LightGray)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn (modifier = Modifier.fillMaxSize()){
-            item(){
-                Text(
-                    text = plantsList.toString()
-                )
-            }
-        }
-     */
-
-    /*
-    // Scrollable Feed List
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Filter the list based on search query
-        val filteredUsers = userList.filter { it.username.contains(searchQuery, ignoreCase = true) }
-
-        items(filteredUsers) { user ->
-            GardenListItem(user = user, onClick = { onUserClick(user) })
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-*/
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-fun SocialTopBar(
-    pagerState: PagerState,
-    onFilterClick: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
-) {
-    CenterAlignedTopAppBar(
-        title = {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    style = MaterialTheme.typography.displaySmall
-                )
-            }
-        },
-        /*
-        actions = {
-            if (pagerState.currentPage == SocialPage.ALL.ordinal) {
-                IconButton(onClick = onFilterClick) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_filter_list_24dp),
-                        contentDescription = stringResource(
-                            id = R.string.menu_filter_by_grow_zone
-                        )
-                    )
-                }
-            }
-        },
-        */
-        scrollBehavior = scrollBehavior
-    )
-}
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 fun PagerScreen(
-    onPlantClick: (Plant) -> Unit,
     pagerState: PagerState,
     pages: Array<SocialPage>,
     plantsList: List<FirestorePlant>?,
@@ -260,9 +162,6 @@ fun PagerScreen(
             when (pages[index]) {
                 SocialPage.ALL -> {
                     AllFeed(
-                        onPlantClick = {
-                            //onPlantClick(it)
-                        },
                         plantsList = plantsList,
                         userViewModel = userViewModel,
                         plantViewModel = plantViewModel,
@@ -272,7 +171,6 @@ fun PagerScreen(
 
                 SocialPage.FOLLOWED -> {
                     FollowedFeed(
-                        onPlantClick = onPlantClick,
                         plantsList = plantsList,
                         followed = followed,
                         plantViewModel = plantViewModel,
@@ -287,7 +185,6 @@ fun PagerScreen(
 
 @Composable
 fun FollowedFeed(
-    onPlantClick: (Plant) -> Unit,
     plantsList: List<FirestorePlant>?,
     followed: List<String>?,
     plantViewModel: PlantViewModel,
@@ -335,7 +232,6 @@ fun FollowedFeed(
 
 @Composable
 fun AllFeed(
-    onPlantClick: () -> Unit,
     plantsList: List<FirestorePlant>?,
     plantViewModel: PlantViewModel,
     userViewModel: UserViewModel,
@@ -381,7 +277,7 @@ fun AllFeed(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 } else {
-                    Box(){
+                    Box{
                         Text(text = "No user found")
                     }
                 }
@@ -496,14 +392,6 @@ fun GardenListItem(
                             fontSize = 20.sp,
                             color = Color.Black
                         )
-                        /*
-                        Text(
-                            text = "Ficus benjamina, commonly known as weeping fig, benjamin fig or ficus tree, and often sold in stores as just ficus, is a species of flowering plant in the family Moraceae, native to Asia and Australia. It is the official tree of Bangkok. The species is also naturalized in the West Indies and in the states of Florida and Arizona in the United States. In its native range, its small fruit are favored by some birds.",
-                            maxLines = 2,
-                            fontSize = 12.sp,
-                            color = Color.DarkGray
-                        )
-                         */
                     }
                     Card(
                         modifier = Modifier.clip(CircleShape),
@@ -615,21 +503,13 @@ fun CardPreview() {
                             fontSize = 20.sp,
                             color = Color.Black
                         )
-                        /*
-                        Text(
-                            text = "Ficus benjamina, commonly known as weeping fig, benjamin fig or ficus tree, and often sold in stores as just ficus, is a species of flowering plant in the family Moraceae, native to Asia and Australia. It is the official tree of Bangkok. The species is also naturalized in the West Indies and in the states of Florida and Arizona in the United States. In its native range, its small fruit are favored by some birds.",
-                            maxLines = 2,
-                            fontSize = 12.sp,
-                            color = Color.DarkGray
-                        )
-                         */
                     }
                     Card(
                         modifier = Modifier.clip(CircleShape),
                         colors = CardDefaults.cardColors(darkGreen)
                     ) {
                         IconButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { },
                             modifier = Modifier.size(48.dp)
                         ) {
                             Icon(
