@@ -124,4 +124,6 @@ dependencies {
     implementation("com.mapbox.maps:android:11.7.0")
     implementation("com.mapbox.extension:maps-compose:11.7.0")
 
+    // calendar
+    implementation("com.kizitonwose.calendar:compose:2.6.0")
 }

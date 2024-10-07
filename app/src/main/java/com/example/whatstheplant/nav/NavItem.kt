@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AppRegistration
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.List
@@ -23,7 +24,7 @@ sealed class NavItem {
         Item(path = NavPath.HOME.toString(), title = NavTitle.HOME, icon = Icons.Default.Yard)
 
     object Search :
-        Item(path = NavPath.SEARCH.toString(), title = NavTitle.SEARCH, icon = Icons.Default.Search)
+        Item(path = NavPath.CALENDAR.toString(), title = NavTitle.CALENDAR, icon = Icons.Default.CalendarMonth)
 
     object Camera :
         Item(path = NavPath.CAMERA.toString(), title = NavTitle.CAMERA, icon = Icons.Default.CameraAlt)

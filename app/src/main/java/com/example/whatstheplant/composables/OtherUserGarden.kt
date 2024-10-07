@@ -66,7 +66,7 @@ fun OtherUserGarden(
                     ) {
                         Text(
                             text = "${plantsList?.get(0)?.username}'s Garden",
-                            style = typography.displaySmall
+                            style = typography.headlineMedium
                         )
                     }
                 }

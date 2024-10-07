@@ -1,24 +1,26 @@
 package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
+import android.health.connect.datatypes.units.Length
+import android.os.Build
 import android.util.Log
-import android.view.MotionEvent
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -27,110 +29,124 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grass
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.ArrowDropUp
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.window.Popup
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.whatstheplant.R
 import com.example.whatstheplant.api.firestore.FirestorePlant
-import com.example.whatstheplant.api.plantid.model.Taxonomy
-import com.example.whatstheplant.nav.NavItem
+import com.example.whatstheplant.api.firestore.FirestoreTask
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.lightBlue
 import com.example.whatstheplant.ui.theme.lightGreen
+import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.example.whatstheplant.ui.theme.yellowSun
 import com.example.whatstheplant.viewModel.PlantViewModel
-import com.google.gson.Gson
+import com.example.whatstheplant.viewModel.TaskViewModel
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MapInitOptions
-import com.mapbox.maps.MapView
-import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
 import com.mapbox.maps.extension.compose.annotation.rememberIconImage
 import com.mapbox.maps.extension.compose.rememberMapState
-import com.mapbox.maps.plugin.animation.moveBy
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 import kotlinx.coroutines.launch
-import kotlin.math.abs
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.Date
+import java.util.Locale
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class
 )
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
+fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, navController: NavController) {
     val plant by plantViewModel.selectedPlant.observeAsState()
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    var expanded by remember { mutableStateOf(false) }
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showCalendarPicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
+
+    val selectedDate = datePickerState.selectedDateMillis?.let {
+        convertMillisToDate(it)
+    } ?: ""
 
     plant?.let {
         val scrollState = rememberLazyListState()
@@ -203,19 +219,40 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Localized description",
+                                contentDescription = "Go Back",
                                 tint = Color.White
                             )
                         }
                     },
                     actions = {
                         IconButton(onClick = {
-                            plant?.let { plantViewModel.deletePlant(userId = it.user_id,  plantId = it.plant_id!!) }
+                            expanded = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.CalendarMonth,
+                                contentDescription = "Schedule",
+                                tint = Color.White
+                            )
+                            DropdownMenu(
+                                modifier = Modifier.background(veryLightGreen),
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                plant?.let { DropDownMenuContent(plant = it, taskViewModel = taskViewModel) }
+                            }
+                        }
+                        IconButton(onClick = {
+                            plant?.let {
+                                plantViewModel.deletePlant(
+                                    userId = it.user_id,
+                                    plantId = it.plant_id!!
+                                )
+                            }
                             navController.navigate("Home")
                         }) {
                             Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = "Localized description",
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Delete Plant",
                                 tint = Color.White
                             )
                         }
@@ -240,7 +277,7 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                             }
                     ) {
                         val pagerState =
-                            rememberPagerState(pageCount = { imgs.size ?: 0 })
+                            rememberPagerState(pageCount = { imgs.size })
                         HorizontalPager(
                             state = pagerState,
                             key = { imgs[it]!! }
@@ -307,7 +344,7 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                             Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                                 if (commonNames != null) {
                                     Text(
-                                        text = "Commonly Known As: ${ // TODO make it bold?
+                                        text = "Commonly Known As: ${
                                             commonNames.substring(
                                                 1,
                                                 commonNames.length - 1
@@ -480,13 +517,13 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                                 Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                                     if (commonNames != null) {
                                         Text(
-                                            text = "Commonly Known As: ${ // TODO make it bold?
+                                            text = "Commonly Known As: ${
                                                 commonNames.substring(
                                                     1,
                                                     commonNames.length - 1
                                                 )
                                             }",
-                                            style = MaterialTheme.typography.titleMedium,
+                                            style = typography.titleMedium,
                                             color = Color.Gray,
                                             textAlign = TextAlign.Center
                                         )
@@ -799,15 +836,12 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                         }
                         if (latitude != null && longitude != null) {
                             item {
-                                var mapInteractionEnabled by remember { mutableStateOf(false) }
-
                                 val mapState = rememberMapState {
                                     gesturesSettings = GesturesSettings {
                                         pitchEnabled = false
                                         scrollEnabled = true
                                     }
                                 }
-
                                 val viewport = rememberMapViewportState {
                                     setCameraOptions {
                                         zoom(11.0)
@@ -821,7 +855,6 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                                         bearing(0.0)
                                     }
                                 }
-
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -901,6 +934,51 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
                         }
                     }
                 }
+                if (showDatePicker) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 60.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = selectedDate,
+                            onValueChange = {},
+                            trailingIcon = {
+                                IconButton(onClick = { showCalendarPicker = true }) {
+                                    Icon(
+                                        imageVector = Icons.Default.DateRange,
+                                        contentDescription = "select"
+                                    )
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 60.dp)
+                                .height(64.dp)
+                        )
+                    }
+
+                    if (showCalendarPicker) {
+                        Popup(
+                            onDismissRequest = { showDatePicker = false },
+                            alignment = Alignment.TopStart,
+                            offset = IntOffset(0, 300)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .offset(y = 64.dp)
+                                    .shadow(elevation = 4.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
+                            ) {
+                                DatePicker(
+                                    state = datePickerState,
+                                    showModeToggle = false
+                                )
+                            }
+                        }
+                    }
+                }
             }
         )
     } ?: run {
@@ -909,9 +987,247 @@ fun PlantDetail(plantViewModel: PlantViewModel, navController: NavController) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel) {
+    val context = LocalContext.current
+
+    //First field - Task type
+    val tasks = listOf("Watering", "Pruning", "Soil")
+    var chosenTask by remember {
+        mutableStateOf("Choose Task Type")
+    }
+    var expandTasksMenu by remember {
+        mutableStateOf(false)
+    }
+
+    //Second Field - Start Date
+    var startDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    val startDatePickerState = rememberDatePickerState()
+    var showStartPopup by remember {
+        mutableStateOf(false)
+    }
+
+    //Third Field - End Date
+    var endDate by remember { mutableStateOf("Select Date") }
+    val endDatePickerState = rememberDatePickerState()
+    var showEndPopup by remember {
+        mutableStateOf(false)
+    }
+
+    //Last Field - Frequency
+    var freqStr by remember { mutableStateOf("") }
+    var freq by remember {
+        mutableIntStateOf(1)
+    }
+
+    // First Field - Task Type
+    DropdownMenuItem(
+        text = { Text(chosenTask) },
+        onClick = { expandTasksMenu = !expandTasksMenu },
+        leadingIcon = {
+            Icon(
+                Icons.Outlined.TaskAlt,
+                contentDescription = null
+            )
+        },
+        trailingIcon = {
+            if (expandTasksMenu) {
+                Icon(
+                    Icons.Outlined.ArrowDropUp,
+                    contentDescription = null
+                )
+            } else {
+                Icon(
+                    Icons.Outlined.ArrowDropDown,
+                    contentDescription = null
+                )
+            }
+        }
+    )
+    if (expandTasksMenu) {
+        DropdownMenu(
+            modifier = Modifier.background(veryLightGreen),
+            expanded = expandTasksMenu,
+            onDismissRequest = { expandTasksMenu = false },
+            offset = DpOffset(0.dp, (-70).dp)
+        ) {
+            tasks.forEachIndexed { index, task ->
+                DropdownMenuItem(text = {
+                    Text(text = task)
+                },
+                    onClick = {
+                        chosenTask = task
+                        expandTasksMenu = false
+                    }
+                )
+            }
+        }
+    }
+
+
+    //Second Field - Start Date
+    DropdownMenuItem(onClick = { showStartPopup = true },
+        text = {
+            OutlinedTextField(
+                value = startDate.replace("-", "/"),
+                readOnly = true,
+                onValueChange = { startDate = it },
+                label = { Text("Start Date") },
+                trailingIcon = {
+                    IconButton(onClick = { showStartPopup = !showStartPopup }) {
+                        Icon(Icons.Default.CalendarToday, contentDescription = "Pick Date")
+                    }
+                }
+            )
+        }
+    )
+    // Popup with Date Picker
+    if (showStartPopup) {
+        DatePickerDialog(
+            onDismissRequest = { showStartPopup = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    startDate = (convertMillisToDate(startDatePickerState.selectedDateMillis!!))
+                    showStartPopup = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartPopup = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = startDatePickerState,
+                showModeToggle = false,
+                colors = DatePickerDefaults.colors(containerColor = veryLightGreen)
+            )
+        }
+    }
+
+    //Third Field - End Date
+    DropdownMenuItem(onClick = { showEndPopup = true },
+        text = {
+            OutlinedTextField(
+                value = endDate,
+                onValueChange = { endDate = it },
+                label = { Text("End Date") },
+                trailingIcon = {
+                    IconButton(onClick = { showEndPopup = !showEndPopup }) {
+                        Icon(Icons.Default.CalendarToday, contentDescription = "Pick Date")
+                    }
+                }
+            )
+        }
+    )
+    // Popup with Date Picker
+    if (showEndPopup) {
+        DatePickerDialog(
+            onDismissRequest = { showEndPopup = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    endDate = (convertMillisToDate(endDatePickerState.selectedDateMillis!!))
+                    if (endDate < startDate) startDate = endDate
+                    showEndPopup = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndPopup = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = endDatePickerState,
+                showModeToggle = false
+            )
+        }
+    }
+
+    //Last Field - Frequency
+    DropdownMenuItem(onClick = { },
+        text = {
+            OutlinedTextField(
+                value = freqStr,
+                onValueChange = {
+                    if(it == ""){
+                        freqStr =""
+                    }
+                    if(it.toIntOrNull()!= null && it.toInt()>0){
+                        freq =it.toInt()
+                        freqStr = it
+                    }
+                },
+                label = { Text("Frequency (Days)") },
+                trailingIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.AccessTime, contentDescription = "Pick Frequency")
+                    }
+                }
+            )
+        }
+    )
+
+    HorizontalDivider(modifier = Modifier.padding(4.dp), color = Color.Gray)
+    DropdownMenuItem(
+        onClick = {},
+        text = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ){
+                TextButton(onClick = {
+                    if(chosenTask == "Choose Task Type" || endDate == "Select Date" || freq == 0 || endDate == ""){
+                        Toast.makeText(
+                            context,
+                            "All fields must have a value.",
+                            LENGTH_SHORT
+                        ).show()
+                    } else {
+                        //Create task object
+                        val task = plant.plant_id?.let {
+                            FirestoreTask(
+                                userId = plant.user_id,
+                                plantId = it,
+                                taskId = "",
+                                type = chosenTask,
+                                startDate = startDate.replace("/", "-"),
+                                endDate = endDate.replace("/", "-"),
+                                frequency = freq
+                            )
+                        }
+                        if (task != null) {
+                            taskViewModel.addTask(task)
+                        }
+                    }
+                }) {
+                    Text("Confirm", color = Color.Black)
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+                }
+            }
+        }
+    )
+}
+
+fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+    return formatter.format(Date(millis))
+}
+
+
 @Preview(showSystemUi = true)
 @Composable
-fun preview() {
+fun Preview() {
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,

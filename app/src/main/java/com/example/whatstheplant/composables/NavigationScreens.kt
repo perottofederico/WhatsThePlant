@@ -1,14 +1,12 @@
 package com.example.whatstheplant.composables
 
-import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,7 +17,7 @@ import com.example.whatstheplant.api.plantid.model.Plant
 import com.example.whatstheplant.nav.NavItem
 import com.example.whatstheplant.composables.tabs.HomeScreen
 import com.example.whatstheplant.composables.tabs.ProfileScreen
-import com.example.whatstheplant.composables.tabs.SearchScreen
+import com.example.whatstheplant.composables.tabs.calendar.CalendarScreen
 import com.example.whatstheplant.composables.tabs.camera.CameraScreen
 import com.example.whatstheplant.composables.tabs.SocialScreen
 import com.example.whatstheplant.datastore.PlantRepository
@@ -29,8 +27,10 @@ import com.example.whatstheplant.signin.SignInViewModel
 import com.example.whatstheplant.signin.UserData
 import com.example.whatstheplant.viewModel.PlantViewModel
 import com.example.whatstheplant.viewModel.PlantViewModelFactory
+import com.example.whatstheplant.viewModel.TaskViewModel
 import com.example.whatstheplant.viewModel.UserViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationScreens(
     userData: UserData,
@@ -42,6 +42,7 @@ fun NavigationScreens(
     val repository = PlantRepository(LocalContext.current)
     val plantViewModel: PlantViewModel = viewModel(factory = PlantViewModelFactory(repository))
     val userViewModel: UserViewModel = viewModel()
+    val taskViewModel: TaskViewModel = viewModel()
     val apiResult = remember {
         mutableStateOf<Plant?>(null)
     }
@@ -64,7 +65,10 @@ fun NavigationScreens(
                 plantViewModel = plantViewModel
             )
         }
-        composable(NavItem.Search.path) { SearchScreen() }
+        composable(NavItem.Search.path) { CalendarScreen(
+            userId = userData.userId,
+            taskViewModel = taskViewModel
+        ) }
         composable(NavItem.Camera.path) { CameraScreen(
             navController,
             apiResult,
@@ -96,7 +100,7 @@ fun NavigationScreens(
         }
 
         composable(NavItem.PlantDetail.path) {
-            PlantDetail(plantViewModel, navController)
+            PlantDetail(plantViewModel, taskViewModel, navController)
         }
 
         composable(NavItem.OtherUserPlantDetail.path){

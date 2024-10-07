@@ -4,7 +4,7 @@ object NavTitle {
     const val LOGIN = "Login"
     const val SIGNUP = "Signup"
     const val HOME = "Home"
-    const val SEARCH = "Search"
+    const val CALENDAR = "Calendar"
     const val CAMERA = "Camera"
     const val FEED = "Feed"
     const val PROFILE = "Profile"

@@ -31,6 +31,15 @@ interface FirestoreApiInterface {
     fun getAllPlants(): Call<List<FirestorePlant>>
     @DELETE("plants/{plantId}")
     fun deletePlant(@Path("plantId") plantId: String) : Call<Void>
+
+    //Tasks
+    @POST("add_task")
+    fun addTask(@Body task: FirestoreTask)  : Call<Void>
+    @GET("tasks/{userId}")
+    fun getTasksByUser(@Path("userId") userId: String): Call<List<FirestoreTask>>
+    @DELETE("tasks/{taskId}")
+    fun deleteTask(@Path("taskId") taskId: String) : Call<Void>
+
 }
 
 object Retrofitclient {
