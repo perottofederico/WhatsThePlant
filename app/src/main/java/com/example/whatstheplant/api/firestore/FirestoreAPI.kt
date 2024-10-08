@@ -29,6 +29,8 @@ interface FirestoreApiInterface {
     fun getPlantsByUser(@Path("userId") userId: String): Call<List<FirestorePlant>>
     @GET("plants")
     fun getAllPlants(): Call<List<FirestorePlant>>
+    //@GET("plants/{plantId}")
+    //fun getPlant(@Path("plantId") plantId : String) : Call<FirestorePlant>
     @DELETE("plants/{plantId}")
     fun deletePlant(@Path("plantId") plantId: String) : Call<Void>
 

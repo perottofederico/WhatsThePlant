@@ -65,7 +65,9 @@ fun NavigationScreens(
         }
         composable(NavItem.Search.path) { CalendarScreen(
             userId = userData.userId,
-            taskViewModel = taskViewModel
+            plantViewModel = plantViewModel,
+            taskViewModel = taskViewModel,
+            navController = navController
         ) }
         composable(NavItem.Camera.path) { CameraScreen(
             navController,

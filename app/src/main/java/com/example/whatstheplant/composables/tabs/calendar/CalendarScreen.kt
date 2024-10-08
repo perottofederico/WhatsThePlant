@@ -1,6 +1,7 @@
 package com.example.whatstheplant.composables.tabs.calendar
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,10 +33,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.whatstheplant.api.firestore.FirestoreTask
+import com.example.whatstheplant.composables.PlantDetail
+import com.example.whatstheplant.composables.clickable
 import com.example.whatstheplant.composables.rememberFirstMostVisibleMonth
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.lightBlue
+import com.example.whatstheplant.ui.theme.lightBrown
+import com.example.whatstheplant.viewModel.PlantViewModel
 import com.example.whatstheplant.viewModel.TaskViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -57,7 +63,9 @@ import java.util.Locale
 @Composable
 fun CalendarScreen(
     userId : String,
-    taskViewModel: TaskViewModel
+    plantViewModel: PlantViewModel,
+    taskViewModel: TaskViewModel,
+    navController: NavController
 ) {
 
     LaunchedEffect(Unit) {
@@ -145,7 +153,18 @@ fun CalendarScreen(
                     tasksForSelectedDate.forEach { task ->
 
                         HorizontalDivider()
-                        TaskRow(task = task)
+                        TaskRow(task = task,
+                            onClick = {
+                                val plantClicked = plantViewModel.plantsList?.firstOrNull{
+                                    Log.d("it", it.plant_id!!)
+                                    Log.d("Task", task.plantId)
+                                    it.plant_id == task.plantId
+                                }
+                                if (plantClicked != null) {
+                                    plantViewModel.setSelectedPlant(plantClicked)
+                                }
+                                navController.navigate("PlantDetail")
+                            })
                     }
                 }
             } else {
@@ -164,14 +183,17 @@ fun CalendarScreen(
 }
 
 @Composable
-fun TaskRow(task: FirestoreTask) {
-    val colorMap = mapOf("Watering" to lightBlue, "Pruning" to darkGreen,"Soil" to Color.Magenta)
+fun TaskRow(task: FirestoreTask, onClick: () -> Unit) {
+    val colorMap = mapOf("Water" to lightBlue, "Fertilize" to darkGreen,"Prune" to lightBrown)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(8.dp)
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // Task type box
         Box(

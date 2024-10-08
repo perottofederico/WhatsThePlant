@@ -8,6 +8,7 @@ import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
@@ -75,6 +77,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -95,6 +98,7 @@ import coil.compose.AsyncImage
 import com.example.whatstheplant.R
 import com.example.whatstheplant.api.firestore.FirestorePlant
 import com.example.whatstheplant.api.firestore.FirestoreTask
+import com.example.whatstheplant.ui.theme.PurpleGrey40
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.lightBlue
 import com.example.whatstheplant.ui.theme.lightGreen
@@ -122,7 +126,11 @@ import java.util.Locale
 )
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, navController: NavController) {
+fun PlantDetail(
+    plantViewModel: PlantViewModel,
+    taskViewModel: TaskViewModel,
+    navController: NavController
+) {
     val plant by plantViewModel.selectedPlant.observeAsState()
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -227,11 +235,13 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                plant?.let { DropDownMenuContent(
-                                    plant = it,
-                                    taskViewModel = taskViewModel,
-                                    onConfirmClick = { expanded = false }
-                                ) }
+                                plant?.let {
+                                    DropDownMenuContent(
+                                        plant = it,
+                                        taskViewModel = taskViewModel,
+                                        onConfirmClick = { expanded = false }
+                                    )
+                                }
                             }
                         }
                         IconButton(onClick = {
@@ -613,7 +623,7 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
                                 ) {
                                     Text(
                                         text = chosenButton.value,
-                                        style =typography.headlineMedium,
+                                        style = typography.headlineMedium,
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier.padding(8.dp)
                                     )
@@ -764,11 +774,15 @@ fun PlantDetail(plantViewModel: PlantViewModel, taskViewModel: TaskViewModel, na
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, onConfirmClick: () -> Unit ) {
+fun DropDownMenuContent(
+    plant: FirestorePlant,
+    taskViewModel: TaskViewModel,
+    onConfirmClick: () -> Unit
+) {
     val context = LocalContext.current
 
     //First field - Task type
-    val tasks = listOf("Watering", "Pruning", "Soil")
+    val tasks = listOf("Water", "Fertilize", "Prune")
     var chosenTask by remember {
         mutableStateOf("Choose Task Type")
     }
@@ -798,14 +812,11 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, on
 
     // First Field - Task Type
     DropdownMenuItem(
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .border(width = 1.dp, color = PurpleGrey40, shape = RoundedCornerShape(4.dp)),
         text = { Text(chosenTask) },
         onClick = { expandTasksMenu = !expandTasksMenu },
-        leadingIcon = {
-            Icon(
-                Icons.Outlined.TaskAlt,
-                contentDescription = null
-            )
-        },
         trailingIcon = {
             if (expandTasksMenu) {
                 Icon(
@@ -822,20 +833,22 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, on
     )
     if (expandTasksMenu) {
         DropdownMenu(
-            modifier = Modifier.background(veryLightGreen),
+            modifier = Modifier.background(veryLightGreen)
+                .border(width = 1.dp, color = PurpleGrey40, shape = RectangleShape),
             expanded = expandTasksMenu,
             onDismissRequest = { expandTasksMenu = false },
-            offset = DpOffset(0.dp, (-70).dp)
+            offset = DpOffset(200.dp, (-162).dp)
         ) {
-            tasks.forEachIndexed { _, task ->
+            tasks.forEachIndexed { index, task ->
                 DropdownMenuItem(text = {
-                    Text(text = task)
+                    Text(text = task, textAlign = TextAlign.Center)
                 },
                     onClick = {
                         chosenTask = task
                         expandTasksMenu = false
                     }
                 )
+                if(index<2) HorizontalDivider(color = PurpleGrey40)
             }
         }
     }
@@ -930,11 +943,11 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, on
             OutlinedTextField(
                 value = freqStr,
                 onValueChange = {
-                    if(it == ""){
-                        freqStr =""
+                    if (it == "") {
+                        freqStr = ""
                     }
-                    if(it.toIntOrNull()!= null && it.toInt()>0){
-                        freq =it.toInt()
+                    if (it.toIntOrNull() != null && it.toInt() > 0) {
+                        freq = it.toInt()
                         freqStr = it
                     }
                 },
@@ -948,16 +961,18 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, on
         }
     )
 
-    HorizontalDivider(modifier = Modifier.padding(4.dp), color = Color.Gray)
+    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray)
     DropdownMenuItem(
         onClick = {},
         text = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
                 horizontalArrangement = Arrangement.Center
-            ){
+            ) {
                 TextButton(onClick = {
-                    if(chosenTask == "Choose Task Type" || endDate == "Select Date" || freq == 0 || endDate == ""){
+                    if (chosenTask == "Choose Task Type" || endDate == "Select Date" || freq == 0 || endDate == "") {
                         Toast.makeText(
                             context,
                             "All fields must have a value.",
@@ -979,9 +994,9 @@ fun DropDownMenuContent(plant : FirestorePlant, taskViewModel: TaskViewModel, on
                         }
                         if (task != null) {
                             taskViewModel.addTask(task)
-                            expandTasksMenu  =  false
+                            expandTasksMenu = false
                             showStartPopup = false
-                            showEndPopup =  false
+                            showEndPopup = false
                             onConfirmClick()
                         }
                         Toast.makeText(
@@ -1046,6 +1061,48 @@ fun Preview() {
                 Text(text = "Family: Scrophulariaceae")
                 Text(text = "Genus: Buddleja")
             }
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun TaskPreview() {
+    // First Field - Task Type
+
+    DropdownMenuItem(
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .border(width = 1.dp, color = PurpleGrey40, shape = RoundedCornerShape(4.dp)),
+        text = { Text("ASEF") },
+        onClick = { },
+        trailingIcon = {
+            if (true) {
+                Icon(
+                    Icons.Outlined.ArrowDropUp,
+                    contentDescription = null
+                )
+            } else {
+                Icon(
+                    Icons.Outlined.ArrowDropDown,
+                    contentDescription = null
+                )
+            }
+        }
+    )
+    if (true) {
+        DropdownMenu(
+            modifier = Modifier.background(veryLightGreen),
+            expanded = true,
+            onDismissRequest = { },
+            offset = DpOffset(200.dp, 200.dp)
+        ) {
+            DropdownMenuItem(text = {
+                Text(text = "task")
+            },
+                onClick = {
+                }
+            )
         }
     }
 }

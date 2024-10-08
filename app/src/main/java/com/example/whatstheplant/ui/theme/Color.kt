@@ -21,3 +21,4 @@ val gray = Color (76, 76, 76, 100)
 
 val lightBlue = Color(35,137,218)
 val yellowSun = Color(255,223,34)
+val lightBrown = Color(79, 21, 7)
