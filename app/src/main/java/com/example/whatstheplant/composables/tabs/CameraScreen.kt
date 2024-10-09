@@ -431,7 +431,7 @@ fun callPlantIdApi(
             result?.let {
                 Log.d("PlantID", "result: $result")
                 apiResult.value = result
-
+                onComplete()
                 /*
                 val root = File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
@@ -449,6 +449,7 @@ fun callPlantIdApi(
                     "There was an error with the API. Please try again.",
                     LENGTH_LONG
                 ).show()
+                onComplete()
             }
         }
     }

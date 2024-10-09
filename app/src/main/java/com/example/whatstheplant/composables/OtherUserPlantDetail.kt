@@ -116,7 +116,7 @@ fun OtherUserPlantDetail(
 
         val taxonomy = plant?.taxonomy //TODO Make taxonomy appearance better
         //val synonyms = plant?.synonyms
-        val edibleParts = plant?.edibleParts
+        val edibleParts = plant?.edibleParts?.removeSurrounding("[", "]")
         val commonUses = plant?.commonUses
         val culturalSignificance = plant?.culturalSignificance
         val toxicity = plant?.toxicity
@@ -497,15 +497,34 @@ fun OtherUserPlantDetail(
                                     )
                                 }
 
-                                Text(
-                                    text = shownText.value,
-                                    modifier = Modifier.padding(
-                                        bottom = 32.dp,
-                                        top = 8.dp,
-                                        start = 16.dp,
-                                        end = 16.dp
+                                if (chosenButton.value == "Taxonomy") {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Column {
+                                            Text(text = "Kingdom: ${taxonomy?.kingdom}")
+                                            Text(text = "Class: ${taxonomy?.`class`}")
+                                            Text(text = "Family: ${taxonomy?.family}")
+                                        }
+                                        Column {
+                                            Text(text = "Phylum: ${taxonomy?.phylum}")
+                                            Text(text = "Order: ${taxonomy?.order}")
+                                            Text(text = "Genus: ${taxonomy?.genus}")
+                                        }
+                                    }
+                                } else {
+
+                                    Text(
+                                        text = shownText.value,
+                                        modifier = Modifier.padding(
+                                            bottom = 32.dp,
+                                            top = 8.dp,
+                                            start = 16.dp,
+                                            end = 16.dp
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
 

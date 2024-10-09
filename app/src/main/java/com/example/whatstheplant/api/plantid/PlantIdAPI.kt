@@ -63,7 +63,7 @@ suspend fun identifyPlantImage(apiKey: String, position : MyLocation?, imageBitm
                     addProperty("longitude", it.longitude)
                 }
                 //to make test fail
-                // addProperty("cake","lie")
+                 // addProperty("cake","lie")
             }
             val queryDetails = "common_names,url,description,taxonomy,rank,gbif_id,inaturalist_id,image,synonyms,edible_parts,watering,best_light_condition,best_soil_type,common_uses,cultural_significance,toxicity,best_watering"
             Log.d("PlantID", "RequestBody: $requestBody")

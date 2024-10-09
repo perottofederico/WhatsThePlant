@@ -3,6 +3,7 @@ package com.example.whatstheplant.composables.tabs.calendar
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -164,7 +165,8 @@ fun CalendarScreen(
                                     plantViewModel.setSelectedPlant(plantClicked)
                                 }
                                 navController.navigate("PlantDetail")
-                            })
+                            }
+                        )
                     }
                 }
             } else {
@@ -184,7 +186,7 @@ fun CalendarScreen(
 
 @Composable
 fun TaskRow(task: FirestoreTask, onClick: () -> Unit) {
-    val colorMap = mapOf("Water" to lightBlue, "Fertilize" to darkGreen,"Prune" to lightBrown)
+    val colorMap = mapOf("Water" to lightBlue, "Fertilize" to lightBrown,"Prune" to darkGreen)
     Row(
         modifier = Modifier
             .fillMaxWidth()

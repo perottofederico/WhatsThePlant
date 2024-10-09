@@ -179,7 +179,7 @@ fun PlantDetail(
 
         val taxonomy = plant?.taxonomy //TODO Make taxonomy appearance better
         //val synonyms = plant?.synonyms
-        val edibleParts = plant?.edibleParts
+        val edibleParts = plant?.edibleParts?.removeSurrounding("[", "]")
         val commonUses = plant?.commonUses
         val culturalSignificance = plant?.culturalSignificance
         val toxicity = plant?.toxicity

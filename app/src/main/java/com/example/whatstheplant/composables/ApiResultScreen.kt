@@ -123,7 +123,7 @@ fun ApiResultScreen(
 
     val taxonomy = firstSuggestion?.details?.taxonomy //TODO Make taxonomy appearance better
     //val synonyms = firstSuggestion?.details?.synonyms
-    val edibleParts = firstSuggestion?.details?.edible_parts.toString()
+    val edibleParts = firstSuggestion?.details?.edible_parts.toString().removeSurrounding("[", "]")
     val commonUses = firstSuggestion?.details?.common_uses
     val culturalSignificance = firstSuggestion?.details?.cultural_significance
     val toxicity = firstSuggestion?.details?.toxicity
@@ -524,6 +524,7 @@ fun ApiResultScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
+
                                 Text(
                                     text = chosenButton.value,
                                     style = MaterialTheme.typography.headlineMedium,
@@ -532,15 +533,34 @@ fun ApiResultScreen(
                                 )
                             }
 
-                            Text(
-                                text = shownText.value,
-                                modifier = Modifier.padding(
-                                    bottom = 32.dp,
-                                    top = 8.dp,
-                                    start = 16.dp,
-                                    end = 16.dp
+                            if (chosenButton.value == "Taxonomy") {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Column {
+                                        Text(text = "Kingdom: ${taxonomy?.kingdom}")
+                                        Text(text = "Class: ${taxonomy?.`class`}")
+                                        Text(text = "Family: ${taxonomy?.family}")
+                                    }
+                                    Column {
+                                        Text(text = "Phylum: ${taxonomy?.phylum}")
+                                        Text(text = "Order: ${taxonomy?.order}")
+                                        Text(text = "Genus: ${taxonomy?.genus}")
+                                    }
+                                }
+                            } else {
+
+                                Text(
+                                    text = shownText.value,
+                                    modifier = Modifier.padding(
+                                        bottom = 32.dp,
+                                        top = 8.dp,
+                                        start = 16.dp,
+                                        end = 16.dp
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                     if(latitude!= null && longitude != null) {

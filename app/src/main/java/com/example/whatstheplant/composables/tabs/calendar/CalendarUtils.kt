@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.example.whatstheplant.composables.clickable
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.lightBlue
+import com.example.whatstheplant.ui.theme.lightBrown
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
@@ -167,7 +168,7 @@ fun Day(
                 verticalAlignment = Alignment.Bottom
             ) {
 
-                if (taskTypes.contains("Watering")) {
+                if (taskTypes.contains("Water")) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -180,11 +181,11 @@ fun Day(
                 }
 
 
-                if (taskTypes.contains("Pruning")) {
+                if (taskTypes.contains("Fertilize")) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(darkGreen)
+                            .background(lightBrown)
                             .size(8.dp) // Smaller circle
                             .padding(4.dp)
                     )
@@ -194,11 +195,11 @@ fun Day(
 
 
                 // Task Type 3
-                if (taskTypes.contains("Soil")) {
+                if (taskTypes.contains("Prune")) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.Magenta) // Different color for task 3
+                            .background(darkGreen) // Different color for task 3
                             .size(8.dp)
                             .padding(4.dp)
                     )
