@@ -1,6 +1,7 @@
 package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,10 +51,13 @@ fun OtherUserGarden(
 
     // Use LaunchedEffect to trigger the API call only once when the HomeScreen is first composed
     LaunchedEffect(Unit) {
+        Log.d("OTHERUSERGARDEN", userId)
         plantViewModel.fetchPlantList(userId = userId)
     }
 
     val plantsList = plantViewModel.plantsList
+    Log.d("plantsList", plantsList.toString())
+
 
     Scaffold(
         topBar = {
@@ -63,10 +67,12 @@ fun OtherUserGarden(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                     ) {
-                        Text(
-                            text = "${plantsList?.get(0)?.username}'s Garden",
-                            style = typography.headlineMedium
-                        )
+                        if (!plantsList.isNullOrEmpty()) {
+                            Text(
+                                text = "${plantsList[0].username}'s Garden",
+                                style = typography.headlineMedium
+                            )
+                        }
                     }
                 }
             )
@@ -115,7 +121,7 @@ fun OtherUserGarden(
                     PlantItem(plant = plant, onClick = {
                         // Navigate to the details page of the plant when clicked
                         plantViewModel.setSelectedPlant(plant)
-                        navController.navigate("PlantDetail")
+                        navController.navigate("PlantDetail") //TODO otheruserplantdetail  ?
                     })
                 }
             }

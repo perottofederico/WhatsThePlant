@@ -2,8 +2,11 @@ package com.example.whatstheplant.composables.tabs
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +20,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +50,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,35 +98,98 @@ fun SocialScreen(
     pages: Array<SocialPage> = SocialPage.entries.toTypedArray(),
     userViewModel: UserViewModel
 ) {
-    // Trigger the API call when the HomeScreen is first composed
     LaunchedEffect(Unit) {
         plantViewModel.fetchAllPlants()
         userViewModel.getUser(userData.userId)
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
     val plantsList = plantViewModel.allPlants?.filter { it.user_id != userData.userId }
     val followed = userViewModel.user?.followedList
 
     val pagerState = rememberPagerState(pageCount = { 2 })
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        //topBar = {}
-    ) {
-        PagerScreen(
-            pagerState = pagerState,
-            pages = pages,
-            plantsList = plantsList,
-            followed = followed,
-            plantViewModel = plantViewModel,
-            userViewModel = userViewModel,
-            navController = navController
-        )
+    Column(modifier = Modifier.fillMaxSize()) {
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            contentColor = darkGreen,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 60.dp),
+            indicator = { tabPositions ->
+                SecondaryIndicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                    color = darkGreen
+                )
+            }
+        ) {
+            pages.forEachIndexed { index, page ->
+                val title = page.title
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                    text = { Text(text = title) },
+                    unselectedContentColor = Color.Gray,
+                    selectedContentColor = Color.Black
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { index ->
+            when (pages[index]) {
+                SocialPage.ALL -> AllFeed(
+                    plantsList = plantsList,
+                    userViewModel = userViewModel,
+                    plantViewModel = plantViewModel,
+                    navController = navController
+                )
+
+                SocialPage.FOLLOWED -> FollowedFeed(
+                    plantsList = plantsList,
+                    followed = followed,
+                    plantViewModel = plantViewModel,
+                    userViewModel = userViewModel,
+                    navController = navController
+                )
+            }
+        }
+
+        HorizontalPager(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            state = pagerState,
+            //verticalAlignment = Alignment.Top
+        ) { index ->
+            when (pages[index]) {
+                SocialPage.ALL -> {
+                    AllFeed(
+                        plantsList = plantsList,
+                        userViewModel = userViewModel,
+                        plantViewModel = plantViewModel,
+                        navController = navController
+                    )
+                }
+
+                SocialPage.FOLLOWED -> {
+                    FollowedFeed(
+                        plantsList = plantsList,
+                        followed = followed,
+                        plantViewModel = plantViewModel,
+                        userViewModel = userViewModel,
+                        navController = navController
+                    )
+                }
+            }
+        }
+
     }
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PagerScreen(
     pagerState: PagerState,
@@ -204,8 +274,10 @@ fun FollowedFeed(
 
     if (followedUsersPlants.isNotEmpty()) {
         LazyColumn(
+            state = rememberLazyListState(),
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom=100.dp)
         ) {
             items(followedUsersPlants) { plant ->
                 GardenListItem(
@@ -235,26 +307,32 @@ fun AllFeed(
     plantsList: List<FirestorePlant>?,
     plantViewModel: PlantViewModel,
     userViewModel: UserViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
 
     var searchQuery by remember { mutableStateOf("") }
     LazyColumn(
+        state = rememberLazyListState(),
         modifier = Modifier
             .fillMaxSize()
-
+            .padding(bottom = 100.dp)
     ) {
         // Filter the list based on search query
         val userList = plantsList?.map { it.username }?.distinct()
         val filteredUsers = userList?.filter { it.contains(searchQuery, ignoreCase = true) }
         if (plantsList != null) {
-            item{
+            item {
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text(text = "Search for users...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = "Search Icon"
+                        )
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
                         unfocusedIndicatorColor = darkGreen,
@@ -265,7 +343,7 @@ fun AllFeed(
                 )
             }
             items(plantsList) { plant ->
-                if(filteredUsers?.contains(plant.username) == true){
+                if (filteredUsers?.contains(plant.username) == true) {
                     GardenListItem(
                         plant = plant,
                         onClick = {
@@ -276,9 +354,14 @@ fun AllFeed(
                         navController = navController
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                } else {
-                    Box{
-                        Text(text = "No user found")
+                }
+            }
+        }
+        if (filteredUsers != null) {
+            if (filteredUsers.isEmpty()){
+                item{
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No users found")
                     }
                 }
             }

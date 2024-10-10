@@ -2,6 +2,7 @@ package com.example.whatstheplant.composables
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
@@ -101,6 +102,7 @@ import com.example.whatstheplant.api.firestore.FirestoreTask
 import com.example.whatstheplant.ui.theme.PurpleGrey40
 import com.example.whatstheplant.ui.theme.darkGreen
 import com.example.whatstheplant.ui.theme.lightBlue
+import com.example.whatstheplant.ui.theme.lightBrown
 import com.example.whatstheplant.ui.theme.lightGreen
 import com.example.whatstheplant.ui.theme.veryLightGreen
 import com.example.whatstheplant.ui.theme.yellowSun
@@ -163,6 +165,12 @@ fun PlantDetail(
         val animateImageSize =
             animateDpAsState(dynamicValue.value, label = "imageSizeAnimatedValue").value
 
+
+        val context = LocalContext.current
+        val codeMap = mapOf(200 to "The task was updated successfully",
+            201 to "Task added successfully!",
+            500 to "Server error"
+        )
 
         val similarImages = plant?.similarImages ?: emptyList()
         val imgUrl = plant!!.img_url
@@ -780,6 +788,10 @@ fun DropDownMenuContent(
     onConfirmClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val codeMap = mapOf(200 to "The task was updated successfully",
+        201 to "Task added successfully!",
+        500 to "Server error"
+    )
 
     //First field - Task type
     val tasks = listOf("Water", "Fertilize", "Prune")
@@ -798,7 +810,7 @@ fun DropDownMenuContent(
     }
 
     //Third Field - End Date
-    var endDate by remember { mutableStateOf("Select Date") }
+    var endDate by remember { mutableStateOf(LocalDate.now().plusYears(1).toString()) }
     val endDatePickerState = rememberDatePickerState()
     var showEndPopup by remember {
         mutableStateOf(false)
@@ -833,7 +845,8 @@ fun DropDownMenuContent(
     )
     if (expandTasksMenu) {
         DropdownMenu(
-            modifier = Modifier.background(veryLightGreen)
+            modifier = Modifier
+                .background(veryLightGreen)
                 .border(width = 1.dp, color = PurpleGrey40, shape = RectangleShape),
             expanded = expandTasksMenu,
             onDismissRequest = { expandTasksMenu = false },
@@ -848,7 +861,7 @@ fun DropDownMenuContent(
                         expandTasksMenu = false
                     }
                 )
-                if(index<2) HorizontalDivider(color = PurpleGrey40)
+                if (index < 2) HorizontalDivider(color = PurpleGrey40)
             }
         }
     }
@@ -860,7 +873,14 @@ fun DropDownMenuContent(
             OutlinedTextField(
                 value = startDate.replace("-", "/"),
                 readOnly = true,
-                onValueChange = { startDate = it },
+                onValueChange = {
+                    Log.d("PLANTDETAIL", LocalDate.parse(it).toString())
+                    if( (LocalDate.parse(it)).isBefore(LocalDate.now())){
+                        startDate =  LocalDate.now().toString() //TODO add error feedback
+                    }
+                    else{
+                        startDate = it
+                    }},
                 label = { Text("Start Date") },
                 trailingIcon = {
                     IconButton(onClick = { showStartPopup = !showStartPopup }) {
@@ -877,6 +897,8 @@ fun DropDownMenuContent(
             confirmButton = {
                 TextButton(onClick = {
                     startDate = (convertMillisToDate(startDatePickerState.selectedDateMillis!!))
+                    if(LocalDate.parse(startDate.replace("/", "-")).isBefore(LocalDate.now())) startDate =LocalDate.now().toString().replace("-", "/")
+                    if(LocalDate.parse(endDate.replace("/", "-")).isBefore(LocalDate.parse(startDate.replace("/", "-")))) endDate = startDate.replace("-", "/")
                     showStartPopup = false
                 }) {
                     Text("OK")
@@ -900,7 +922,7 @@ fun DropDownMenuContent(
     DropdownMenuItem(onClick = { showEndPopup = true },
         text = {
             OutlinedTextField(
-                value = endDate,
+                value = endDate.replace("-", "/"),
                 onValueChange = { endDate = it },
                 label = { Text("End Date") },
                 trailingIcon = {
@@ -918,7 +940,7 @@ fun DropDownMenuContent(
             confirmButton = {
                 TextButton(onClick = {
                     endDate = (convertMillisToDate(endDatePickerState.selectedDateMillis!!))
-                    if (endDate < startDate) startDate = endDate
+                    if (LocalDate.parse(endDate).isBefore(LocalDate.parse(startDate.replace("/", "-")))) endDate = startDate
                     showEndPopup = false
                 }) {
                     Text("OK")
@@ -972,7 +994,7 @@ fun DropDownMenuContent(
                 horizontalArrangement = Arrangement.Center
             ) {
                 TextButton(onClick = {
-                    if (chosenTask == "Choose Task Type" || endDate == "Select Date" || freq == 0 || endDate == "") {
+                    if (chosenTask == "Choose Task Type" || endDate == "Select Date" || freq == 1 || endDate == "") {
                         Toast.makeText(
                             context,
                             "All fields must have a value.",
@@ -993,17 +1015,14 @@ fun DropDownMenuContent(
                             )
                         }
                         if (task != null) {
-                            taskViewModel.addTask(task)
+                            taskViewModel.addTask(task, onFinish = {
+                                Toast.makeText(context, codeMap[it], LENGTH_SHORT).show()
+                            })
                             expandTasksMenu = false
                             showStartPopup = false
                             showEndPopup = false
                             onConfirmClick()
                         }
-                        Toast.makeText(
-                            context,
-                            "Task schedule added.",
-                            LENGTH_LONG
-                        ).show()
                     }
                 }) {
                     Text("Confirm", color = Color.Black)
@@ -1019,7 +1038,7 @@ fun DropDownMenuContent(
 }
 
 fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return formatter.format(Date(millis))
 }
 

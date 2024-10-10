@@ -18,7 +18,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -165,6 +169,9 @@ fun CalendarScreen(
                                     plantViewModel.setSelectedPlant(plantClicked)
                                 }
                                 navController.navigate("PlantDetail")
+                            },
+                            onDeleteClick = {
+                                taskViewModel.deleteTask(task.userId, task.taskId)
                             }
                         )
                     }
@@ -185,7 +192,7 @@ fun CalendarScreen(
 }
 
 @Composable
-fun TaskRow(task: FirestoreTask, onClick: () -> Unit) {
+fun TaskRow(task: FirestoreTask, onClick: () -> Unit, onDeleteClick : ()-> Unit) {
     val colorMap = mapOf("Water" to lightBlue, "Fertilize" to lightBrown,"Prune" to darkGreen)
     Row(
         modifier = Modifier
@@ -209,7 +216,7 @@ fun TaskRow(task: FirestoreTask, onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         // Task details
-        Column {
+        Column(modifier = Modifier.weight(3f)) {
             Text(
                 text = task.type,
                 style = MaterialTheme.typography.bodyMedium
@@ -217,6 +224,16 @@ fun TaskRow(task: FirestoreTask, onClick: () -> Unit) {
             Text(
                 text = task.plantName,
                 style = MaterialTheme.typography.bodySmall
+            )
+        }
+        IconButton(
+            modifier = Modifier.weight(1f),
+            onClick = { onDeleteClick() }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Delete Task",
+                tint = Color.Red
             )
         }
     }

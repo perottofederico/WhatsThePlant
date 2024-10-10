@@ -191,7 +191,9 @@ fun ProfileScreen(
             val mapViewportState = rememberMapViewportState {
                 setCameraOptions {
                     zoom(5.0)
-                    center(markerLocations?.get(0))
+                    if (!markerLocations.isNullOrEmpty()) {
+                        center(markerLocations[0])
+                    }
                     pitch(0.0)
                     bearing(0.0)
                 }
@@ -201,7 +203,6 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(start = 16.dp, bottom = 32.dp, end = 16.dp)
                     .height(300.dp)
-                //.verticalScroll(rememberScrollState())
             ) {
                 MapboxMap(
                     Modifier

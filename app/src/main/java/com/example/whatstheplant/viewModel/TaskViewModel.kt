@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.whatstheplant.api.firestore.FirestoreTask
 import com.example.whatstheplant.api.firestore.firestoreApiInterface
@@ -16,12 +18,16 @@ class TaskViewModel : ViewModel() {
     var tasksList by mutableStateOf<List<FirestoreTask>?>(null)
         private set
 
-    fun addTask(task: FirestoreTask) {
+    private val _taskResponseStatus = MutableLiveData<Int>() // This will hold the HTTP response code
+    val taskResponseStatus: LiveData<Int> = _taskResponseStatus
+
+    fun addTask(task: FirestoreTask, onFinish: (Int) -> Unit) {
         val call = firestoreApiInterface.addTask(task)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     fetchTaskList(userId = task.userId)
+                    onFinish(response.code())
                 } else {
                     Log.w(
                         "TASKVIEWMODEL",
@@ -76,7 +82,7 @@ class TaskViewModel : ViewModel() {
     }
 
     fun deleteTask(userId: String, taskId: String) {
-        firestoreApiInterface.deletePlant(plantId = taskId)
+        firestoreApiInterface.deleteTask(taskId = taskId)
             .enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if (response.isSuccessful) {

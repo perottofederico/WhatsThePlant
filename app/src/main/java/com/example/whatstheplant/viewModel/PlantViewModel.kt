@@ -93,7 +93,7 @@ class PlantViewModel(private val repository: PlantRepository) : ViewModel() {
                                 "fetchPlantList",
                                 "Fetched ${plants.size} plants from API."
                             )
-                            plantsList = plants
+                            plantsList = plants//.sortedByDescending { it.created_at }
                         } else {
                             // Handle case where the response body is null (unexpected)
                             Log.w(
